@@ -22,6 +22,7 @@ async function getPosts() {
   const res = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5', {
     cache: 'force-cache', // Cache the response indefinitely (like SSG)
   })
+  console.log(process.env.NEXT_PUBLIC_API_URL); // Logs the environment variable defined in next.config.js
   return res.json()
 }
 
