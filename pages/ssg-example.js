@@ -14,10 +14,10 @@ import Link from 'next/link'
  *
  * To convert this to ISR, add `revalidate: N` to the returned object (see /blog).
  */
-export default function Home({ posts, generatedAt }) {
+export default function SsgExample({ posts, generatedAt }) {
   return (
     <div>
-      <h1>Home — SSG (Static Site Generation)</h1>
+      <h1>SSG Example (Pages Router)</h1>
       <p>
         <strong>Mechanism:</strong> <code>getStaticProps</code> runs at build time.
         The page is pre-rendered as static HTML and served from a CDN.

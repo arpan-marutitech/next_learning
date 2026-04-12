@@ -2,7 +2,7 @@
 const nextConfig = {
   // pages/ and app/ directories coexist out of the box in Next.js 13+
   // Routes must not overlap:
-  //   Pages Router → /   /about   /blog   /blog/[slug]
+  //   Pages Router → /about   /blog   /blog/[slug]
   //   App Router   → /app-router/*
 
   // ─── Common next.config.js Examples ──────────────────────────────────────
@@ -82,7 +82,7 @@ const nextConfig = {
   trailingSlash: true,
 
   // 11. Base path (useful when deploying under a sub-path)
-  basePath: '/my-app',
+  // basePath: '/my-app',
 
   // 12. Output mode
   // output: 'standalone', // self-contained build for Docker
