@@ -1,134 +1,131 @@
-# Next.js Rendering Strategies — Learning Project
+# Next.js Rendering and Routing Learning Project
 
-A hands-on reference project that demonstrates **all four rendering strategies** in Next.js using both the **Pages Router** and the **App Router** side by side.
+This project is a learning/demo app for:
 
----
+- App Router and Pages Router in one project
+- SSG, ISR, SSR, and CSR behavior
+- Basic Jest + React Testing Library setup
 
-## What This Project Covers
+## Current Routes
 
-| Strategy | Pages Router | App Router | Route |
-|---|---|---|---|
-| **SSG** — Static Site Generation | `getStaticProps` | `cache: 'force-cache'` | `/` and `/app-router` |
-| **ISR** — Incremental Static Regeneration | `getStaticProps` + `revalidate` | `next: { revalidate: 10 }` | `/blog` and `/app-router/blog` |
-| **SSR** — Server-Side Rendering | `getServerSideProps` | `cache: 'no-store'` | `/blog/[slug]` and `/app-router/blog/[slug]` |
-| **CSR** — Client-Side Rendering | `useEffect` | `'use client'` + `useEffect` | `/about` |
+### App Router routes (`app/`)
 
----
+| Route | File | Purpose |
+|---|---|---|
+| `/` | `app/page.js` | App Router homepage |
+| `/app-router` | `app/app-router/page.js` | SSG-like with `fetch(..., { cache: 'force-cache' })` |
+| `/app-router/blog` | `app/app-router/blog/page.js` | ISR-like with `revalidate: 10` |
+| `/app-router/blog/[slug]` | `app/app-router/blog/[slug]/page.js` | SSR-like with `cache: 'no-store'` |
+
+### Pages Router routes (`pages/`)
+
+| Route | File | Purpose |
+|---|---|---|
+| `/about` | `pages/about.js` | CSR example |
+| `/blog` | `pages/blog/index.js` | ISR with `getStaticProps` + `revalidate` |
+| `/blog/[slug]` | `pages/blog/[slug].js` | SSR with `getServerSideProps` |
+| `/ssg-example` | `pages/ssg-example.js` | SSG with `getStaticProps` |
+
+Note:
+
+- Root `/` is intentionally handled by App Router (`app/page.js`).
+- There is no `pages/index.js` to avoid route conflicts at `/`.
 
 ## Project Structure
 
-```
+```text
 nextjs-learning/
-├── app/                          # App Router (Next.js 13+)
-│   ├── layout.js                 # Root layout — wraps all App Router routes
-│   └── app-router/
-│       ├── page.js               # SSG-like  → cache: 'force-cache'
-│       └── blog/
-│           ├── page.js           # ISR-like  → next: { revalidate: 10 }
-│           └── [slug]/
-│               └── page.js       # SSR-like  → cache: 'no-store'
-├── pages/                        # Pages Router (classic)
-│   ├── _app.js                   # Root wrapper for all Pages Router routes
-│   ├── index.js                  # SSG        → getStaticProps
-│   ├── about.js                  # CSR        → useEffect
-│   └── blog/
-│       ├── index.js              # ISR        → getStaticProps + revalidate: 10
-│       └── [slug].js             # SSR        → getServerSideProps
-├── next.config.js
-└── package.json
+|-- app/
+|   |-- layout.js
+|   |-- page.js
+|   |-- page.test.js
+|   `-- app-router/
+|       |-- page.js
+|       `-- blog/
+|           |-- page.js
+|           `-- [slug]/
+|               `-- page.js
+|-- pages/
+|   |-- _app.js
+|   |-- about.js
+|   |-- ssg-example.js
+|   `-- blog/
+|       |-- index.js
+|       `-- [slug].js
+|-- jest.config.js
+|-- jest.setup.js
+|-- next.config.js
+`-- package.json
 ```
 
----
-
-## Getting Started
+## Setup
 
 ### Prerequisites
 
 - Node.js 18+
 - npm
 
-### Install dependencies
+### Install
 
 ```bash
 npm install
 ```
 
-### Development mode
+### Run in development
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open `http://localhost:3000`.
 
-> **Note:** In dev mode, all caching is **disabled**. `getStaticProps`, ISR revalidation, and `fetch` cache options are all ignored — every request re-fetches fresh data. This is intentional so changes are reflected immediately without rebuilding.
-
-### Production mode (to see real caching behaviour)
+### Run production build
 
 ```bash
-npm run build   # build the production app
-npm start       # serve on http://localhost:3000
+npm run build
+npm start
 ```
 
-Production mode is required to observe the correct behaviour of SSG, ISR, and SSR.
+Use production mode to observe true caching behavior for SSG/ISR/SSR.
 
----
+## Testing (Basic)
 
-## Rendering Strategies Explained
+This project includes a minimal Jest setup for learning.
 
-### SSG — Static Site Generation
+### Installed packages
 
-- Data is fetched **once at build time**.
-- The page is pre-rendered to static HTML and served from a CDN.
-- The timestamp on the page **never changes** on refresh (frozen at build time).
-- **Pages Router:** `getStaticProps` with no `revalidate`.
-- **App Router:** `fetch(url, { cache: 'force-cache' })`.
+- `jest`
+- `jest-environment-jsdom`
+- `@testing-library/react`
+- `@testing-library/jest-dom`
 
-> Next.js 14: `force-cache` was the default. Next.js 15+: default changed to `no-store` — must opt in explicitly.
+### Config files
 
----
+- `jest.config.js` uses `next/jest`
+- `jest.setup.js` imports `@testing-library/jest-dom`
 
-### ISR — Incremental Static Regeneration
+### Example test
 
-- Like SSG, but the page is **regenerated in the background** after a TTL expires.
-- Uses a **stale-while-revalidate** pattern:
-  1. Page is built at deploy time.
-  2. After 10 seconds, the next request gets the stale page but triggers a background rebuild.
-  3. The request after that gets the freshly rebuilt page.
-- **Pages Router:** `getStaticProps` with `revalidate: 10`.
-- **App Router:** `fetch(url, { next: { revalidate: 10 } })` or `export const revalidate = 10`.
+- `app/page.test.js`
+- Verifies homepage renders "Home Page"
 
----
+### Run tests
 
-### SSR — Server-Side Rendering
+```bash
+npm test
+```
 
-- The page is **re-rendered on the server for every single request**.
-- The timestamp changes on every refresh.
-- Suitable for real-time data, personalised content, or pages that need request-time context (cookies, headers).
-- **Pages Router:** `getServerSideProps`.
-- **App Router:** `fetch(url, { cache: 'no-store' })`.
+## Useful Scripts
 
----
+```bash
+npm run dev
+npm run build
+npm run start
+npm run test
+```
 
-### CSR — Client-Side Rendering
+## Learning Notes
 
-- Next.js serves an **empty HTML shell**. Data is fetched entirely in the browser after hydration.
-- Uses `useState` + `useEffect`.
-- Not SEO-friendly. Visible as a Fetch/XHR request in browser DevTools.
-- **Pages Router:** plain `useEffect` (no data fetching function needed).
-- **App Router:** add `'use client'` directive at the top, then use `useEffect` the same way.
-
----
-
-## Data Source
-
-All pages fetch from [JSONPlaceholder](https://jsonplaceholder.typicode.com) — a free fake REST API. No database or backend setup required.
-
----
-
-## Key Takeaway
-
-| Mode | Caching active? | Use for |
-|---|---|---|
-| `npm run dev` | No — always refetches | Development |
-| `npm start` | Yes — SSG/ISR/SSR work as designed | Observing real behaviour |
+- In `npm run dev`, data caching behavior differs from production.
+- App Router server components can use fetch caching options directly.
+- Pages Router uses `getStaticProps` and `getServerSideProps` for data fetching behavior.
